@@ -7,4 +7,4 @@ MGP is the Moore-Greitzer Model (MGM) describes gas turbine engine surge-stall d
 Eache gymanisum file creates observation space consisting of the state space for the correct number dimensionality for each system.  
 The action space is one-dimensional.  The step uses solve IVP with a small time step over which the control is applied as a constant. Solve IVP calls dynamics package, which holds exact equations, with fixed parameters.
 
-I implement gymnasium files by placing in gymanisum classic control, updating necessary __init__.py files in that gymnaiusm (not incluced) and manually/locally importing library in python script.  I also manually/locally import the dynamics library in the python scrip
+I implement gymnasium files by placing in gymanisum classic control, updating necessary __init__.py files in that gymnaiusm and manually/locally importing library in python script.  I also manually/locally import the dynamics library in the python scrip
