@@ -17,8 +17,8 @@ def VanDerPol(t, a, K):
     #put dynamics here, in ODE format
     #for VDP, dx/dt=y; dy/dt=mu*(1-x**2)y-x (+k for control input)
     mu=4
-    da1=a2+K
-    da2=mu*(1-a1**2)*a2-a1
+    da1=a2
+    da2=mu*(1-a1**2)*a2-a1+K
     return np.array([da1, da2])
     
 def Lorenz(t, X, K):
@@ -56,3 +56,16 @@ def MeanField(t, A, K):
     da4=-0.1*a4+10*a3+K
     return np.array([da1, da2, da3, da4])
     
+def MGM(t, A, K):
+    #non-linear approximation of surge/stall dynamics of a gas turbine engine per Moore-Greitzer model from
+    #"Output-Feedbak Cotnrol on Nonlinear systems using Control Contraction Metrics and Convex Optimization"
+    #by Machester and Slotine
+    #2D system, x1 is mass flow, x2 is pressure increase
+    x1, x2 = A
+    if x1>20:  x1=20.
+    elif x1<-20:  x1=-20.
+    if x2>20:  x2=20.
+    elif x2<-20:  x2=-20.
+    dx1= -x2-1.5*x1**2-0.5*x1**3
+    dx2=x1+K
+    return np.array([dx1, dx2])
