@@ -8,3 +8,4 @@ from gymnasium.envs.classic_control.pendulum import PendulumEnv
 from gymnasium.envs.classic_control.vdp import VDPEnv
 from gymnasium.envs.classic_control.Lrz import LrzEnv
 from gymnasium.envs.classic_control.MeanField import MeanFieldEnv
+from gymnasium.envs.classic_control.Diffusion import DiffusionEnv

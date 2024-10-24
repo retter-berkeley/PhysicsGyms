@@ -60,7 +60,13 @@ register(
 register(
      id="VDP-v0",
      entry_point="gymnasium.envs.classic_control.vdp:VDPEnv",
-     max_episode_steps=500,
+     max_episode_steps=1000,
+)
+
+register(
+     id="MGM-v0",
+     entry_point="gymnasium.envs.classic_control.MGM:MGMEnv",
+     max_episode_steps=100,
 )
 
 register(
@@ -72,13 +78,19 @@ register(
 register(
      id="Lrz-v0",
      entry_point="gymnasium.envs.classic_control.Lrz:LrzEnv",
-     max_episode_steps=500,
+     max_episode_steps=1000,
  )
  
 register(
     id="MeanField-v0",
     entry_point="gymnasium.envs.classic_control.MeanField:MeanFieldEnv",
-    max_episode_steps=200,
+    max_episode_steps=1000,
+)
+
+register(
+    id="Diffusion-v0",
+    entry_point="gymnasium.envs.classic_control.Diffusion:DiffusionEnv",
+    max_episode_steps=300,
 )
 # Phys2d (jax classic control)
 # ----------------------------------------
