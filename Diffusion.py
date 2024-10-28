@@ -42,7 +42,7 @@ class DiffusionEnv(gym.Env):
     def reset(self, seed: Optional[int] = None, options=None):
         #need below to seed self.np_random
         super().reset(seed=seed)
-        grid = UnitGrid([32, 32], periodic=[False, False]) # generate grid
+        grid = pde.CartesianGrid([[0, 1], [0, 1]], [32, 32], periodic=[False, False]) # generate grid
         state = ScalarField.random_uniform(grid, 0.0, 0.5)
         self.state = state.data
         observation = self._get_obs()
@@ -55,6 +55,8 @@ class DiffusionEnv(gym.Env):
         #control row order is left, right, bottom, top
         #u=action.item()
         grid=action.grid
+        
+        ###uncomment if using spcific control points along boundary or all boundaries as control###
         bc_x_left = {"value": action.control[0,:]}
         bc_x_right = {"value": action.control[1,:]}
         bc_x = [bc_x_left, bc_x_right]
@@ -62,12 +64,18 @@ class DiffusionEnv(gym.Env):
         bc_y_top = {"value": action.control[3,:]}
         bc_y = [bc_y_bottom, bc_y_top]
         
-        eq = DiffusionPDE(bc=[bc_x, bc_y])
+        ###uncomment if using bottom boundary as control###
+        #bc_y_top={"value": 0}
+        #bc_y_bottom={"value": action.control}
+        #bc_y=[bc_y_bottom, bc_y_top]
+        #bc_x="periodic"
+          
+        
+        eq = DiffusionPDE(diffusivity=10, bc=[bc_x, bc_y])
         result = eq.solve(action.state, t_range=0.2, adaptive = True, tracker=None)
         self.state = result.data       
         done=False
         observation=self._get_obs()
-        #done=(math.sqrt(x1.item()**2+x2.item()**2<0.5)# and action<0.5) 
         #reward will be based on difference across all grid cells of sensor area between
         #desired sensor readings and actual.  This is  hard coded in the gym step function
         #in future could make it an input to init
