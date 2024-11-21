@@ -28,9 +28,9 @@ from gymnasium.error import DependencyNotInstalled
 
 class DiffusionEnv(gym.Env):
     #no render modes
-    def __init__(self, render_mode=None, size=32):
+    def __init__(self, render_mode=None, size: int =11):
                 
-        self.observation_space =spaces.Box(low=0, high=size, shape=(2,), dtype=float)
+        self.observation_space =spaces.Box(low=0, high=10, shape=(size,), dtype=float)
      
         self.action_space = spaces.Box(-10, 10, shape=(1,), dtype=float) 
         #need to update action to normal distribution
@@ -42,8 +42,8 @@ class DiffusionEnv(gym.Env):
     def reset(self, seed: Optional[int] = None, options=None):
         #need below to seed self.np_random
         super().reset(seed=seed)
-        grid = pde.CartesianGrid([[0, 1], [0, 1]], [32, 32], periodic=[False, False]) # generate grid
-        state = ScalarField.random_uniform(grid, 0.0, 0.5)
+        grid = pde.CartesianGrid([[0, 4], [0, 4]], [20, 20], periodic=[True, True]) # generate grid
+        state = ScalarField.random_uniform(grid, 0.0, 0.2)
         self.state = state.data
         observation = self._get_obs()
 
@@ -54,15 +54,16 @@ class DiffusionEnv(gym.Env):
         #action is an object that holds the grid, the state, and the boundary conditions/controls
         #control row order is left, right, bottom, top
         #u=action.item()
-        grid=action.grid
-        
+        grid = pde.CartesianGrid([[0, 4], [0, 4]], [20, 20], periodic=[True, True])
+        state = ScalarField.random_uniform(grid, 0.0, 0.2)
+        state.data=self.state
         ###uncomment if using spcific control points along boundary or all boundaries as control###
-        bc_x_left = {"value": action.control[0,:]}
-        bc_x_right = {"value": action.control[1,:]}
-        bc_x = [bc_x_left, bc_x_right]
-        bc_y_bottom = {"value": action.control[2,:]}
-        bc_y_top = {"value": action.control[3,:]}
-        bc_y = [bc_y_bottom, bc_y_top]
+        #bc_x_left = {"value": action.control[0,:]}
+        #bc_x_right = {"value": action.control[1,:]}
+        #bc_x = [bc_x_left, bc_x_right]
+        #bc_y_bottom = {"value": action.control[2,:]}
+        #bc_y_top = {"value": action.control[3,:]}
+        #bc_y = [bc_y_bottom, bc_y_top]
         
         ###uncomment if using bottom boundary as control###
         #bc_y_top={"value": 0}
@@ -70,19 +71,23 @@ class DiffusionEnv(gym.Env):
         #bc_y=[bc_y_bottom, bc_y_top]
         #bc_x="periodic"
           
+        state.data[:,1]=action
+        
+        bc_x="periodic"
+        bc_y="periodic"
         
         eq = DiffusionPDE(diffusivity=10, bc=[bc_x, bc_y])
-        result = eq.solve(action.state, t_range=0.2, adaptive = True, tracker=None)
+        result = eq.solve(state, t_range=0.2, adaptive = True, tracker=None)
         self.state = result.data       
         done=False
         observation=self._get_obs()
         #reward will be based on difference across all grid cells of sensor area between
         #desired sensor readings and actual.  This is  hard coded in the gym step function
         #in future could make it an input to init
-        target=np.array([[1,2,1,1],[2,3,2,2],[1,2,1,1],[0.5,0.5,0.5,0.5]])
+        target=np.array([[1,2,1,],[2,3,2,],[1,2,1,]])
         #use eucliead norm over n gird points
         #first reduce state to sensor points
-        n_sense=int(np.sqrt(action.num_sens))
+        n_sense=3 #hard coded
         meas=np.empty((n_sense,n_sense))
         dimx=result.data.shape[0]
         dimy=result.data.shape[1]
